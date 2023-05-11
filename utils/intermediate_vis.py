@@ -17,18 +17,19 @@ from utils.loss import lovasz_softmax
 
 
 class Vis_iter(object):
-    no_log_keys = ['project', 'name','log_tb', 'log_wandb','check_every', 'eval_every','device', 'parallel', 'pin_memory', 'num_workers']
-                   
-    def __init__(self, args, model, optimizer, scheduler_iter, scheduler_epoch, test_loader,log_path):
+    no_log_keys = ['project', 'name', 'log_tb', 'log_wandb', 'check_every', 'eval_every', 'device', 'parallel',
+                   'pin_memory', 'num_workers']
+
+    def __init__(self, args, model, optimizer, scheduler_iter, scheduler_epoch, test_loader, log_path):
 
         # Objects
         self.model = model
-        self.optimizer, self.scheduler_iter, self.scheduler_epoch= optimizer, scheduler_iter, scheduler_epoch
+        self.optimizer, self.scheduler_iter, self.scheduler_epoch = optimizer, scheduler_iter, scheduler_epoch
         # Paths
         self.log_path = log_path
 
-        if args.dataset =='kitti':
-            config_file = os.path.join('/home/jumin/multinomial_diffusion/datasets/semantic_kitti.yaml')
+        if args.dataset == 'kitti':
+            config_file = os.path.join('/home/ma1/work/scene-scale-diffusion/datasets/semantic_kitti.yaml')
             kitti_config = yaml.safe_load(open(config_file, 'r'))
             self.remap = kitti_config['learning_map_inv']
             self.color_map = kitti_config["color_map"]
@@ -36,14 +37,13 @@ class Vis_iter(object):
             map_index = np.asarray([self.remap[i] for i in range(20)])
             self.label_to_names = np.asarray([label[map_i] for map_i in map_index])
 
-        elif args.dataset =='carla':
-            config_file = os.path.join('/home/jumin/multinomial_diffusion/datasets/carla.yaml')
+        elif args.dataset == 'carla':
+            config_file = os.path.join('/home/ma1/work/scene-scale-diffusion/datasets/carla.yaml')
             carla_config = yaml.safe_load(open(config_file, 'r'))
             self.color_map = carla_config["remap_color_map"]
             self.remap = None
             LABEL_TO_NAMES = carla_config["label_to_names"]
             self.label_to_names = np.asarray(list(LABEL_TO_NAMES.values()))
-
 
         # Initialize
         self.current_epoch = 0
@@ -67,27 +67,27 @@ class Vis_iter(object):
 
     def run(self, epochs):
         self.checkpoint_load(self.args.resume_path)
-        for epoch in range(self.current_epoch, epochs): 
+        for epoch in range(self.current_epoch, epochs):
             self.sample()
 
     def sample(self):
         self.model.eval()
         with torch.no_grad():
             for iterate, (voxel_input, output, counts) in enumerate(self.test_loader):
-                voxel_input = torch.from_numpy(np.asarray(voxel_input)).squeeze(1).cuda() 
-                output = torch.from_numpy(np.asarray(output)).long().cuda()            
+                voxel_input = torch.from_numpy(np.asarray(voxel_input)).squeeze(1).cuda()
+                output = torch.from_numpy(np.asarray(output)).long().cuda()
                 _, intermediate = self.model.module.sample(voxel_input, intermediate=True)
                 inter_vis(self.args, intermediate)
                 break
-                   
+
     def checkpoint_load(self, resume_path):
         checkpoint = torch.load(resume_path)
-        
+
         if self.args.distribution:
             self.model.module.load_state_dict(checkpoint['model'])
-        else :
+        else:
             self.model.load_state_dict(checkpoint['model'])
-        
+
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.scheduler_iter: self.scheduler_iter.load_state_dict(checkpoint['scheduler_iter'])
         if self.scheduler_epoch: self.scheduler_epoch.load_state_dict(checkpoint['scheduler_epoch'])
