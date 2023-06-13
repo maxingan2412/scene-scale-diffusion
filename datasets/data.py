@@ -26,9 +26,9 @@ def get_class_weights(freq):
 def get_data(args):
     assert args.dataset in dataset_choices
     if args.dataset == 'carla':
-        train_dir = "/media/data/ssdiffusion/eval_fine/Cartesian/Train"
-        val_dir = "/media/data/ssdiffusion/eval_fine/Cartesian/Val"
-        test_dir = "/media/data/ssdiffusion/eval_fine/Cartesian/Test"
+        train_dir = "/media/ma1/storage/ssddate/Cartesian/Train"
+        val_dir = "/media/ma1/storage/ssddate/Cartesian/Val"
+        test_dir = "/media/ma1/storage/ssddate/Cartesian/Test"
 
         x_dim = 128
         y_dim = 128

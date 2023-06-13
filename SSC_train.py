@@ -82,7 +82,7 @@ def get_args():
     parser.add_argument('--completion_epoch', type=int, default=20)
     parser.add_argument('--log_tb', type=eval, default=True)
     parser.add_argument('--log_home', type=str, default=None)
-    parser.add_argument('--log_path', type=str, default='')
+    parser.add_argument('--log_path', type=str, default='logs/')
 
     args = parser.parse_args()
     return args
